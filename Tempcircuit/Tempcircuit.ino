@@ -10,11 +10,11 @@
 #include "rgb_lcd.h"
 rgb_lcd lcd;
 
-const int BGrove = 4275;               // B value of the Grove thermistor
- int BCircuit = 4600;               // B value of the circuit's thermistor
+#define BGrove 4275              // B value of the Grove thermistor
+#define BCircuit 5831             // B value of the circuit's thermistor
 
 //using the mean of the two boundaries given in the lab tutorial
-const int R0 = 100000;            // R0 = 100k (same for both Grove and )
+//const int R0 = 100000;            // R0 = 100k cancels out
 const int pinTempSensor = A0;     // Grove - Temperature Sensor connect to A0
 const int pinTempCircuit = A2;    // circuit reading
 
@@ -43,18 +43,15 @@ void loop()
     int VGrove = analogRead(pinTempSensor);
     int VCircuit = analogRead(pinTempCircuit);
 
-    //int potValue = analogRead(pinPotentiometer);
-    //BCircuit = map(potValue, 0, 1023, 0, 10000);
 
     //equation (8) used to compute the resistance
-    float RGrove = R0*(1023.0/VGrove-1.0);
-    float RCircuit = R0*(1023.0/VCircuit-1.0);
+    float RGrove = (1023.0/VGrove-1.0);
+    float RCircuit = (1023.0/VCircuit-1.0);
     //equation (9) to compute the temperature from the resistor
-    float TempGrove = 1.0/(log(RGrove/R0)/BGrove+1/298.15)-273.15; 
-    float TempCircuit = 1.0/(log(RCircuit/R0)/BCircuit+1/298.15)-273.15; 
+    float TempGrove = 1.0/(log(RGrove)/BGrove+1/298.15)-273.15; 
+    float TempCircuit = 1.0/(log(RCircuit)/BCircuit+1/298.15)-273.15; 
 
 
-    //rest is printing to LCD:
 
     // Use dtostrf() to convert float to string
     char TempBufferGrove[10];  // Create a buffer for the string
@@ -63,8 +60,7 @@ void loop()
     dtostrf(TempCircuit, 6, 2, TempBufferCircuit); 
     // "6" is total width, "2" is decimal places
 
-    char BCircuitBuffer[10];
-    dtostrf(BCircuit, 6, 0, BCircuitBuffer);
+
     
     lcd.clear();
     lcd.write("Temp: ");
@@ -73,7 +69,7 @@ void loop()
 
   int potValue = analogRead(pinPotentiometer);
   int threshold = map(potValue, 0, 1023, 0, 50);
-/*
+
   lcd.setCursor(0, 1);  // Move to the second row
   lcd.print("Thold: ");
   lcd.print(threshold);
@@ -83,7 +79,7 @@ void loop()
   } else {
     lcd.setRGB(0, 255, 0);  // Set color to green if below threshold
   }
-  */
+  
   //print to Serial for plotting or saving
   Serial.print(TempBufferGrove);
   Serial.print('\t');
@@ -91,8 +87,7 @@ void loop()
   Serial.print('\t');
 
   Serial.println(threshold);
-  //Serial.println(BCircuitBuffer);
 
   
-    delay(1000);
+  delay(1000);
 }
